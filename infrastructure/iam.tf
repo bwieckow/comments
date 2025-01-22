@@ -23,9 +23,9 @@ resource "aws_iam_policy" "comments" {
       {
         Effect = "Allow",
         Action = [
-          "ssm:GetParameter"
+          "dynamodb:PutItem"
         ],
-        Resource = "arn:aws:ssm:*:${data.aws_caller_identity.current.account_id}:parameter/comments-*"
+        Resource = aws_dynamodb_table.comments.arn
       }
     ]
   })
