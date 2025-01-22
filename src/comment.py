@@ -1,7 +1,7 @@
 import json
 import boto3
 from botocore.exceptions import ClientError
-from datetime import datetime
+from datetime import datetime, timezone  # Import timezone
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('comments')
@@ -52,7 +52,7 @@ def post_comment(event):
     comment_id = event['comment_id']
     user_id = event['user_id']
     comment_text = event['comment_text']
-    comment_date = datetime.now(datetime.timezone.utc).isoformat()
+    comment_date = datetime.now(timezone.utc).isoformat()  # Use timezone.utc
     
     try:
         response = table.put_item(
