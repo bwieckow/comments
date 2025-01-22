@@ -23,7 +23,8 @@ resource "aws_iam_policy" "comments" {
       {
         Effect = "Allow",
         Action = [
-          "dynamodb:PutItem"
+          "dynamodb:PutItem",
+          "dynamodb:Scan"  # Added Scan action
         ],
         Resource = aws_dynamodb_table.comments.arn
       }

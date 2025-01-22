@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "comments" {
   function_name = "comments"
   role          = aws_iam_role.comments.arn
-  handler       = "put_comment.lambda_handler"  # Updated handler
+  handler       = "comment.lambda_handler"  # Updated handler
   runtime       = "python3.13" # Latest Python version supported by AWS Lambda
 
   filename         = data.archive_file.lambda_zip.output_path
