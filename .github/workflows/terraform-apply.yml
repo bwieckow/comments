@@ -32,19 +32,6 @@ jobs:
         aws-secret-access-key: ${{ secrets.TERRAFORM_SECRET_ACCESS_KEY }}
         aws-region: eu-west-1
 
-    - name: Create google lambda layer
-      run: |
-        cd ./infrastructure/google_lambda_layer
-        
-        # Create a directory for the dependencies
-        mkdir -p python
-
-        # Install the dependencies in the python directory
-        pip install -r requirements.txt -t python
-
-        # Zip the contents of the python directory
-        zip -r google-layer.zip python
-
     # Runs a `terraform apply` command using the runners shell
     - name: Run terraform apply
       run: |
