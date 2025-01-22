@@ -7,7 +7,7 @@ resource "aws_dynamodb_table" "comments" {
   range_key      = "user_id"
 
   attribute {
-    name = "id"
+    name = "comment_id"
     type = "S"
   }
 
