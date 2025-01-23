@@ -83,10 +83,7 @@ def post_comment(event):
             }
 
 def lambda_handler(event, context):
-    print(event)
-
     http_method = event['requestContext']['http']['method']
-
     
     if http_method == 'POST':
         return post_comment(event)
