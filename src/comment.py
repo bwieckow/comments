@@ -13,15 +13,16 @@ def validate_input(event, required_fields):
     return True, None
 
 def get_comments(event):
-    is_valid, error_message = validate_input(event, ['start_date', 'end_date'])
+    query_parameters = event['queryStringParameters']
+    is_valid, error_message = validate_input(query_parameters, ['start_date', 'end_date'])
     if not is_valid:
         return {
             'statusCode': 400,
             'body': json.dumps(error_message)
         }
 
-    start_date = event['start_date']
-    end_date = event['end_date']
+    start_date = query_parameters['start_date']
+    end_date = query_parameters['end_date']
     
     try:
         response = table.scan(
@@ -42,16 +43,17 @@ def get_comments(event):
         }
 
 def post_comment(event):
-    is_valid, error_message = validate_input(event, ['comment_id', 'user_id', 'comment_text'])
+    body = json.loads(event['body'])  # Parse the JSON string
+    is_valid, error_message = validate_input(body, ['comment_id', 'user_id', 'comment_text'])
     if not is_valid:
         return {
             'statusCode': 400,
             'body': json.dumps(error_message)
         }
 
-    comment_id = event['comment_id']
-    user_id = event['user_id']
-    comment_text = event['comment_text']
+    comment_id = body['comment_id']
+    user_id = body['user_id']
+    comment_text = body['comment_text']
     comment_date = datetime.now(timezone.utc).isoformat()  # Use timezone.utc
     
     try:
@@ -81,7 +83,10 @@ def post_comment(event):
             }
 
 def lambda_handler(event, context):
-    http_method = event['httpMethod']
+    print(event)
+
+    http_method = event['requestContext']['http']['method']
+
     
     if http_method == 'POST':
         return post_comment(event)
