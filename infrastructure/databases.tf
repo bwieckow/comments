@@ -3,13 +3,7 @@ resource "aws_dynamodb_table" "comments" {
   billing_mode   = "PROVISIONED"
   read_capacity  = 1
   write_capacity = 1
-  hash_key       = "comment_id"
-  range_key      = "user_id"
-
-  attribute {
-    name = "comment_id"
-    type = "S"
-  }
+  hash_key       = "user_id"
 
   attribute {
     name = "user_id"

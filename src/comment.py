@@ -1,5 +1,6 @@
 import json
 import boto3
+import urllib.request  # Import urllib.request
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone  # Import timezone
 
@@ -43,15 +44,31 @@ def get_comments(event):
         }
 
 def post_comment(event):
-    body = json.loads(event['body'])  # Parse the JSON string
-    is_valid, error_message = validate_input(body, ['comment_id', 'user_id', 'comment_text'])
+    body = json.loads(event['body'])
+    is_valid, error_message = validate_input(body, ['user_id', 'comment_text', 'id_token'])
     if not is_valid:
         return {
             'statusCode': 400,
             'body': json.dumps(error_message)
         }
 
-    comment_id = body['comment_id']
+    id_token = body['id_token']
+    url = f'https://oauth2.googleapis.com/tokeninfo?id_token={id_token}'
+    try:
+        with urllib.request.urlopen(url) as response:
+            if response.status != 200:
+                return {
+                    'statusCode': 401,
+                    'body': json.dumps('Invalid id_token')
+                }
+            user_info = json.loads(response.read())
+            user_name = user_info.get('name', 'Unknown')
+    except urllib.error.URLError:
+        return {
+            'statusCode': 401,
+            'body': json.dumps('Invalid id_token')
+        }
+
     user_id = body['user_id']
     comment_text = body['comment_text']
     comment_date = datetime.now(timezone.utc).isoformat()  # Use timezone.utc
@@ -59,12 +76,12 @@ def post_comment(event):
     try:
         response = table.put_item(
             Item={
-                'comment_id': comment_id,
-                'user_id': user_id,
+                'comment_date': comment_date,
                 'comment_text': comment_text,
-                'comment_date': comment_date
+                'user_id': user_id,
+                'user_name': user_name
             },
-            ConditionExpression='attribute_not_exists(user_id)'
+            ConditionExpression='attribute_not_exists(user_id)'  # Ensure user_id does not exist
         )
         return {
             'statusCode': 200,
