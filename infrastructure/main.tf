@@ -39,7 +39,7 @@ resource "aws_lambda_function" "comments_2" {
 resource "aws_lambda_function_url" "comments_2" {
   provider           = aws.virginia
 
-  function_name      = aws_lambda_function.comments.function_name
+  function_name      = aws_lambda_function.comments_2.function_name
   authorization_type = "NONE"
   cors {
     allow_origins = ["http://localhost:3000", "http://opsmaster.s3-website-eu-west-1.amazonaws.com", "https://www.ops-master.com", "https://ops-master.com"]
