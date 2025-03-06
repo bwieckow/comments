@@ -22,7 +22,7 @@ resource "aws_lambda_function_url" "comments" {
 
 ### For CloudFront
 
-resource "aws_lambda_function" "comments" {
+resource "aws_lambda_function" "comments_2" {
   provider      = aws.virginia
   
   function_name = "comments"
@@ -36,7 +36,7 @@ resource "aws_lambda_function" "comments" {
   timeout = 15
 }
 
-resource "aws_lambda_function_url" "comments" {
+resource "aws_lambda_function_url" "comments_2" {
   provider           = aws.virginia
 
   function_name      = aws_lambda_function.comments.function_name
