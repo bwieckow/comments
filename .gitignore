@@ -1,3 +1,6 @@
 **venv
 **/__pycache__
+**/lambda_function.zip
+**.terraform
+**.terraform.lock.hcl
 *event.json
