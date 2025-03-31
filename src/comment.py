@@ -4,7 +4,7 @@ import urllib.request  # Import urllib.request
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone  # Import timezone
 
-dynamodb = boto3.resource('dynamodb', region='eu-west-1')
+dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
 table = dynamodb.Table('comments')
 
 def validate_input(event, required_fields):
