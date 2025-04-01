@@ -29,7 +29,7 @@ resource "aws_lambda_permission" "cloudfront_origin_access_control" {
 
   statement_id  = "AllowCloudFrontServicePrincipal"
   action        = "lambda:InvokeFunctionUrl"
-  function_name = aws_lambda_function.calendar.function_name
+  function_name = aws_lambda_function.comments.function_name
   principal     = "cloudfront.amazonaws.com"
   source_arn    = data.aws_cloudfront_distribution.opsmaster.arn
 }
