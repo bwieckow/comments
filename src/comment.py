@@ -45,7 +45,7 @@ def get_comments(event):
 
 def post_comment(event):
     body = json.loads(event['body'])
-    is_valid, error_message = validate_input(body, ['comment_text', 'id_token', 'rating'])
+    is_valid, error_message = validate_input(body, ['comment_text', 'id_token', 'rating', 'username'])
     if not is_valid:
         return {
             'statusCode': 400,
@@ -62,7 +62,6 @@ def post_comment(event):
                     'body': json.dumps('Invalid id_token')
                 }
             user_info = json.loads(response.read())
-            user_name = user_info.get('name', 'Unknown')
             user_id = user_info.get('sub')
             if not user_id:
                 return {
@@ -75,10 +74,11 @@ def post_comment(event):
             'body': json.dumps('Invalid id_token')
         }
 
-    comment_text = body['comment_text']
-    comment_date = datetime.now(timezone.utc).isoformat()  # Use timezone.utc
     rating = body['rating']
-    
+    user_name = body['username']
+    comment_text = body['comment_text']
+    comment_date = datetime.now(timezone.utc).isoformat()
+
     try:
         response = table.put_item(
             Item={
@@ -88,7 +88,7 @@ def post_comment(event):
                 'comment_text': comment_text,
                 'rating': rating
             },
-            ConditionExpression='attribute_not_exists(user_id)'  # Ensure user_id does not exist
+            ConditionExpression='attribute_not_exists(user_id)'
         )
         return {
             'statusCode': 200,
