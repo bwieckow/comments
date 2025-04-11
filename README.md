@@ -51,7 +51,7 @@ Save the following JSON as `post_event.json`:
             "method": "POST"
         }
     },
-    "body": "{\"comment_text\": \"This is a test comment.\", \"id_token\": \"test_id_token\", \"rating\": 5, \"username\": \"Test User\"}"
+    "body": "{\"comment_text\": \"This is a test comment.\", \"id_token\": \"test_id_token\", \"rating\": \"5\", \"username\": \"Test User\"}"
 }
 ```
 
