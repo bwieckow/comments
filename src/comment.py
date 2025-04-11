@@ -33,6 +33,7 @@ def get_comments(event):
                 ":end_date": end_date
             }
         )
+        print("Response from DynamoDB:", response)  # Debugging line
         return {
             'statusCode': 200,
             'body': json.dumps(response['Items'])
