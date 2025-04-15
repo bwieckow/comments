@@ -1,5 +1,6 @@
 import json
 import boto3
+import base64
 import urllib.request  # Import urllib.request
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone  # Import timezone
@@ -45,15 +46,40 @@ def get_comments(event):
         }
 
 def post_comment(event):
-    body = json.loads(event['body'])
-    is_valid, error_message = validate_input(body, ['comment_text', 'id_token', 'rating', 'username'])
+    body = event.get("body", "")
+    is_base64 = event.get("isBase64Encoded", False)
+
+    if is_base64:
+        try:
+            decoded_body = base64.b64decode(body).decode("utf-8")
+            print("Decoded Body:", decoded_body)
+        except Exception as e:
+            print("Error decoding body:", str(e))
+            return {
+                'statusCode': 400,
+                'body': json.dumps('Invalid base64-encoded body')
+            }
+    else:
+        decoded_body = body
+        print("Plain Body:", decoded_body)
+
+    try:
+        decoded_body = json.loads(decoded_body)  # Parse the decoded body as JSON
+    except json.JSONDecodeError as e:
+        print("Error parsing JSON body:", str(e))
+        return {
+            'statusCode': 400,
+            'body': json.dumps('Invalid JSON body')
+        }
+
+    is_valid, error_message = validate_input(decoded_body, ['comment_text', 'id_token', 'rating', 'username'])
     if not is_valid:
         return {
             'statusCode': 400,
             'body': json.dumps(error_message)
         }
 
-    id_token = body['id_token']
+    id_token = decoded_body['id_token']
     url = f'https://oauth2.googleapis.com/tokeninfo?id_token={id_token}'
     try:
         with urllib.request.urlopen(url) as response:
@@ -75,9 +101,9 @@ def post_comment(event):
             'body': json.dumps('Invalid id_token')
         }
 
-    rating = body['rating']
-    user_name = body['username']
-    comment_text = body['comment_text']
+    rating = decoded_body['rating']
+    user_name = decoded_body['username']
+    comment_text = decoded_body['comment_text']
     comment_date = datetime.now(timezone.utc).isoformat()
 
     try:
