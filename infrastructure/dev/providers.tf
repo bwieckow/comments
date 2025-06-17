@@ -1,10 +1,11 @@
 provider "aws" {
-  region  = "eu-west-1"
+  region = "eu-west-1"
 
   default_tags {
     tags = {
       Name        = "comments"
       Project     = "opsmaster"
+      Environment = "dev"
     }
   }
 }
@@ -17,6 +18,7 @@ provider "aws" {
     tags = {
       Name        = "comments"
       Project     = "opsmaster"
+      Environment = "dev"
     }
   }
 }
