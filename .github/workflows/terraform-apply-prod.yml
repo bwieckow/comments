@@ -1,17 +1,19 @@
 # This is a workflow to see what will be affected with upcoming changes
 
-name: Terraform PLAN
+name: Terraform APPLY Prod
 
 # Controls when the action will run. Triggers the workflow on pull request
 # events but only for the main branch
 on:
-  pull_request:
+  push:
     branches: [ main ]
+    paths:
+      - 'infrastructure/prod/**'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "plan"
-  plan:
+  # This workflow contains a single job called "apply"
+  apply:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -22,8 +24,7 @@ jobs:
     - uses: hashicorp/setup-terraform@v3
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.13' 
-  
+        python-version: '3.13'
 
     # Set AWS credentials
     - name: Configure AWS credentials
@@ -33,10 +34,10 @@ jobs:
         aws-secret-access-key: ${{ secrets.TERRAFORM_SECRET_ACCESS_KEY }}
         aws-region: eu-west-1
 
-    # Runs a `terraform plan` command using the runners shell
-    - name: Run terraform plan
+    # Runs a `terraform apply` command using the runners shell
+    - name: Run terraform apply
       run: |
-        cd ./infrastructure
+        cd ./infrastructure/prod
         terraform version
         terraform init
-        terraform plan
+        terraform apply -auto-approve
