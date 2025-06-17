@@ -1,6 +1,6 @@
 # This is a workflow to see what will be affected with upcoming changes
 
-name: Terraform PLAN Dev
+name: Terraform
 
 # Controls when the action will run. Triggers the workflow on pull request
 # events but only for the main branch
@@ -8,7 +8,8 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'infrastructure/dev/**'
+      - 'infrastructure/**'
+      - 'src/**'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -16,6 +17,10 @@ jobs:
   plan:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    strategy:
+      # This job will run on the latest version of Ubuntu
+      matrix:
+        env: [dev, prod]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -36,9 +41,38 @@ jobs:
         aws-region: eu-west-1
 
     # Runs a `terraform plan` command using the runners shell
-    - name: Run terraform plan
+    - name: Run terraform plan ${{ matrix.env }}
+      id: tf_plan
       run: |
-        cd ./infrastructure/dev
+        cd ./infrastructure/${{ matrix.env }}
         terraform version
         terraform init
-        terraform plan
+        terraform plan -detailed-exitcode
+        echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev, prod]
+    environment: ${{ matrix.env }}
+    if: needs.plan.outputs['tf_plan.exit_code'] == '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.TERRAFORM_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.TERRAFORM_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+      - name: Run terraform apply ${{ matrix.env }}
+        run: |
+          cd ./infrastructure/${{ matrix.env }}
+          terraform version
+          terraform init
+          terraform apply -auto-approve
