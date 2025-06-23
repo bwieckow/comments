@@ -9,13 +9,13 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/run-terraform-prod.yml'
-      - 'infrastructure/**'
+      - 'infrastructure/prod/**'
       - 'src/**'
   push:
     branches: [ main ]
     paths:
       - '.github/workflows/run-terraform-prod.yml'
-      - 'infrastructure/**'
+      - 'infrastructure/prod/**'
       - 'src/**'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
