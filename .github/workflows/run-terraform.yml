@@ -62,7 +62,7 @@ jobs:
     - name: Set output for dev and prod
       id: set_output
       run: |
-        echo "${{ matrix.env }}_exitcode=${{ steps.tf_plan.outputs.exit_code }}" >> "$GITHUB_OUTPUT"
+        echo "${{ matrix.env }}_exitcode=${{ steps.tf_plan.outputs.exitcode }}" >> "$GITHUB_OUTPUT"
 
   apply:
     needs: plan
@@ -72,7 +72,7 @@ jobs:
       matrix:
         env: [dev, prod]
     environment: ${{ matrix.env }}
-    if: github.event_name == 'push' && needs.plan.outputs['${{ matrix.env }}'] == '2'
+    if: github.event_name == 'push' && needs.plan.outputs['prod'] == '2'
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
