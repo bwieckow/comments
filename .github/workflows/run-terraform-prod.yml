@@ -1,6 +1,6 @@
 # This is a workflow to see what will be affected with upcoming changes
 
-name: Terraform
+name: Terraform Prod
 
 # Controls when the action will run. Triggers the workflow on pull request
 # events but only for the main branch
