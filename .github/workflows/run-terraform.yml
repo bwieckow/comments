@@ -72,7 +72,7 @@ jobs:
       matrix:
         env: [dev, prod]
     environment: ${{ matrix.env }}
-    if: github.event_name == 'push' && needs.plan.outputs['${{ github.env }}'] == '2'
+    if: github.event_name == 'push' && needs.plan.outputs[${{ github.env }}] == '2'
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
