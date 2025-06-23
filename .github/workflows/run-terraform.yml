@@ -25,7 +25,8 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     outputs:
-      tf_plan_exitcode: ${{ steps.tf_plan.outputs.exitcode }}
+      dev: ${{ steps.set_output.outputs.dev_exitcode }}
+      prod: ${{ steps.set_output.outputs.prod_exitcode }}
     strategy:
       fail-fast: false
       matrix:
@@ -57,6 +58,11 @@ jobs:
         terraform version
         terraform init
         terraform plan -detailed-exitcode
+    
+    - name: Set output for dev and prod
+      id: set_output
+      run: |
+        echo "${{ matrix.env }}_exitcode=${{ steps.tf_plan.outputs.exit_code }}" >> "$GITHUB_OUTPUT"
 
   apply:
     needs: plan
@@ -66,7 +72,7 @@ jobs:
       matrix:
         env: [dev, prod]
     environment: ${{ matrix.env }}
-    if: github.event_name == 'push' && needs.plan.outputs.tf_plan_exitcode == '2'
+    if: github.event_name == 'push' && needs.plan.outputs['${{ matrix.env }}'] == '2'
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
