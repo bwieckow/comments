@@ -62,7 +62,7 @@ jobs:
     - name: Set output for dev and prod
       id: set_output
       run: |
-        echo "${{ matrix.env }}_exitcode=${{ steps.tf_plan.outputs.exit_code }}" >> "$GITHUB_OUTPUT"
+        echo "${{ matrix.env }}_exitcode=${{ steps.tf_plan.outputs.exitcode }}" >> "$GITHUB_OUTPUT"
 
   apply:
     needs: plan
