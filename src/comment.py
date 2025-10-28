@@ -1,12 +1,13 @@
 import json
 import boto3
 import base64
+import os
 import urllib.request  # Import urllib.request
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone  # Import timezone
 
 dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
-table = dynamodb.Table('comments')
+table = dynamodb.Table(os.environ['DYNAMODB_TABLE_NAME'])
 
 def validate_input(event, required_fields):
     for field in required_fields:
