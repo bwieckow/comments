@@ -10,6 +10,12 @@ resource "aws_lambda_function" "comments" {
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   timeout = 15
+
+  environment {
+    variables = {
+      DYNAMODB_TABLE_NAME = aws_dynamodb_table.comments.name
+    }
+  }
 }
 
 resource "aws_lambda_function_url" "comments" {

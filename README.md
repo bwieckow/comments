@@ -36,6 +36,16 @@ This service allows you to post and retrieve comments using AWS DynamoDB. Below 
     pip install -r requirements.txt
     ```
 
+5. Export the required environment variable:
+    ```sh
+    export DYNAMODB_TABLE_NAME=comments
+    ```
+    
+    **Note:** The table name should match your DynamoDB table name:
+    - For development: `comments-dev`
+    - For production: `comments`
+    - For local testing: `comments-dev` (or create a local table with your preferred name)
+
 ## Running the Service
 
 To run the service locally, you can use the following commands:
