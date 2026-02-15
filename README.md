@@ -2,51 +2,113 @@
 
 This service allows you to post and retrieve comments using AWS DynamoDB. Below are the instructions to set up and run the service locally.
 
-## Prerequisites
+## Requirements
 
-- Python 3.7 or higher
-- AWS CLI configured with appropriate permissions
-- Virtualenv
+Make sure you have installed the required dependencies:
 
-## Setup
+```bash
+pip install -r requirements.txt
+```
 
-1. Clone the repository:
-    ```sh
-    git clone <repository-url>
-    cd comments
-    ```
+## AWS Credentials
 
-2. Create a virtual environment:
-    ```sh
-    python3 -m venv venv
-    ```
+Ensure that you have set up your AWS credentials. You can do this by either configuring the AWS CLI with your credentials or setting the following environment variables:
 
-3. Activate the virtual environment:
-    - On macOS/Linux:
-        ```sh
-        source venv/bin/activate
-        ```
-    - On Windows:
-        ```sh
-        .\venv\Scripts\activate
-        ```
+```bash
+export AWS_ACCESS_KEY_ID=your_access_key_id
+export AWS_SECRET_ACCESS_KEY=your_secret_access_key
+export AWS_DEFAULT_REGION=eu-west-1
+```
 
-4. Install the required packages:
-    ```sh
-    pip install -r requirements.txt
-    ```
+## Environment Variables
 
-5. Export the required environment variable:
-    ```sh
-    export DYNAMODB_TABLE_NAME=comments
-    ```
-    
-    **Note:** The table name should match your DynamoDB table name:
-    - For development: `comments-dev`
-    - For production: `comments`
-    - For local testing: `comments-dev` (or create a local table with your preferred name)
+Set the required environment variable for the DynamoDB table:
 
-## Running the Service
+```bash
+export DYNAMODB_TABLE_NAME=comments-dev
+```
+
+**Note:** The table name should match your DynamoDB table name:
+- For development: `comments-dev`
+- For production: `comments`
+
+## Running the Script
+
+To run the script from the command line, you can use the following command:
+
+```bash
+python src/comment.py
+```
+
+Note: The script is designed to be triggered by AWS Lambda, so you may need to simulate an event and context if running locally.
+
+## Example
+
+### POST Request
+
+You can create a test event JSON file (e.g., `src/post_event.json`) with the following content:
+
+```json
+{
+    "body": "{\"comment_text\": \"This is a great service!\", \"id_token\": \"your_google_id_token\", \"rating\": 5}",
+    "requestContext": {
+        "http": {
+            "method": "POST"
+        }
+    }
+}
+```
+
+Then, run the script with the test event:
+
+```bash
+python -c 'import json; import src.comment as comment; event = json.load(open("src/post_event.json")); print(comment.lambda_handler(event, None))'
+```
+
+Or use the Makefile:
+
+```bash
+make test-post
+```
+
+### GET Request
+
+You can create a test event JSON file (e.g., `src/get_event.json`) with the following content:
+
+```json
+{
+    "queryStringParameters": {
+        "start_date": "2026-01-01T00:00:00",
+        "end_date": "2026-12-31T23:59:59"
+    },
+    "requestContext": {
+        "http": {
+            "method": "GET"
+        }
+    }
+}
+```
+
+Then, run the script with the test event:
+
+```bash
+python -c 'import json; import src.comment as comment; event = json.load(open("src/get_event.json")); print(comment.lambda_handler(event, None))'
+```
+
+Or use the Makefile:
+
+```bash
+make test-get
+```
+
+## Using the Makefile
+
+The Makefile provides convenient commands for setting up and testing the service:
+
+- `make setup` - Creates a virtual environment and installs dependencies
+- `make test-post` - Tests the POST endpoint with a sample event
+- `make test-get` - Tests the GET endpoint with a sample event
+- `make clean` - Removes the virtual environment and Python cache files
 
 To run the service locally, you can use the following commands:
 
