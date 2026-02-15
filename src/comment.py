@@ -73,7 +73,7 @@ def post_comment(event):
             'body': json.dumps('Invalid JSON body')
         }
 
-    is_valid, error_message = validate_input(decoded_body, ['comment_text', 'id_token', 'rating', 'username'])
+    is_valid, error_message = validate_input(decoded_body, ['comment_text', 'id_token', 'rating'])
     if not is_valid:
         return {
             'statusCode': 400,
@@ -103,30 +103,64 @@ def post_comment(event):
         }
 
     rating = decoded_body['rating']
-    user_name = decoded_body['username']
+    user_name = user_info.get('name', user_info.get('email', 'Unknown User'))
     comment_text = decoded_body['comment_text']
     comment_date = datetime.now(timezone.utc).isoformat()
+    action = decoded_body.get('action', None)
 
     try:
-        response = table.put_item(
-            Item={
-                'user_id': user_id,
-                'user_name': user_name,
-                'comment_date': comment_date,
-                'comment_text': comment_text,
-                'rating': rating
-            },
-            ConditionExpression='attribute_not_exists(user_id)'
-        )
-        return {
-            'statusCode': 200,
-            'body': json.dumps('Comment added successfully')
-        }
+        # If action is 'update', override the existing comment
+        if action == 'update':
+            response = table.put_item(
+                Item={
+                    'user_id': user_id,
+                    'user_name': user_name,
+                    'comment_date': comment_date,
+                    'comment_text': comment_text,
+                    'rating': rating
+                }
+            )
+            return {
+                'statusCode': 200,
+                'body': json.dumps('Comment updated successfully')
+            }
+        else:
+            # Original behavior: prevent duplicate comments
+            response = table.put_item(
+                Item={
+                    'user_id': user_id,
+                    'user_name': user_name,
+                    'comment_date': comment_date,
+                    'comment_text': comment_text,
+                    'rating': rating
+                },
+                ConditionExpression='attribute_not_exists(user_id)'
+            )
+            return {
+                'statusCode': 200,
+                'body': json.dumps('Comment added successfully')
+            }
     except ClientError as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+            # Retrieve existing comment to return to client
+            try:
+                existing_comment = table.get_item(Key={'user_id': user_id})
+                if 'Item' in existing_comment:
+                    return {
+                        'statusCode': 409,
+                        'body': json.dumps({
+                            'message': 'User has already commented',
+                            'existing_comment': existing_comment['Item']
+                        })
+                    }
+            except ClientError:
+                pass
+            
             return {
-                'statusCode': 400,
-                'body': json.dumps('User has already commented')
+                'statusCode': 409,
+                'body': json.dumps({
+                    'message': 'User has already commented'
+                })
             }
         else:
             return {
